@@ -13,7 +13,6 @@ module Borderlands
       @productionversion = data['productionVersion']
       @note              = data['note']
     end
-    attr_reader :contractids
     attr_reader :accountid
     attr_reader :contractid
     attr_reader :groupid
@@ -23,5 +22,3 @@ module Borderlands
     attr_reader :note
   end
 end
-
-

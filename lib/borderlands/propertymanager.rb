@@ -2,6 +2,7 @@ require 'borderlands/property'
 require 'borderlands/contract'
 require 'borderlands/group'
 require 'borderlands/client'
+require 'borderlands/hostname'
 
 module Borderlands
   class PropertyManager
@@ -40,9 +41,8 @@ module Borderlands
       contract_group_pairs.each do |cg|
         begin
           properties_hash = @client.get_json_body(
-            [ "/papi/v0/properties/?",
-              "contractId=#{cg[:contract]}&",
-              "groupId=#{cg[:group]}" ].join
+            "/papi/v0/properties/",
+            { 'contractId' => cg[:contract], 'groupId' => cg[:group], }
           )
           if properties_hash && properties_hash['properties']['items']
             properties_hash['properties']['items'].each do |prp|
@@ -55,6 +55,30 @@ module Borderlands
         end
       end
       properties
+    end
+
+    # version defaults to the current production version, which is pretty
+    # much always going to be the most meaningful thing to look at
+    def hostnames(property, version = nil)
+      raise 'property must be a Borderlands::Property object' unless property.is_a? Property
+      version ||= property.productionversion
+      begin
+        hostnames_hash = @client.get_json_body(
+          "/papi/v0/properties/#{property.id}/versions/#{version}/hostnames/",
+          { 'contractId' => property.contractid, 'groupId' => property.groupid },
+        )
+      rescue Exception => e
+        raise "unable to retrieve hostnames for #{property.name}: #{e.message}"
+      end
+      if hostnames_hash && hostnames_hash['hostnames'] && hostnames_hash['hostnames']['items']
+        hostnames = hostnames_hash['hostnames']['items'].map do |ehn|
+          Hostname.new ehn
+        end
+      else
+        # no hostnames returned
+        hostnames = nil
+      end
+      hostnames
     end
 
   private

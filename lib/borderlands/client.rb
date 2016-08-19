@@ -19,18 +19,19 @@ module Borderlands
         :max_body      => config.max_body,
       )
     end
-    def get(req)
+    def get(req, query={})
       resp = nil
-      if req.is_a? Net::HTTP::Get
-        resp = @http.request(req)
-      else
-        resp = @http.request(Net::HTTP::Get.new URI.join(baseuri, req).to_s)
-      end
+      uri = URI.join(
+        baseuri,
+        req,
+        '?' + query.keys.map { |k| [ k, '=', query[k] ].join }.join('&')
+      )
+      resp = @http.request(Net::HTTP::Get.new uri.to_s)
       resp.body
     end
 
-    def get_json_body(req)
-      body = get(req)
+    def get_json_body(req, query={})
+      body = get(req,query)
       begin
         json = JSON.parse(body)
       rescue Exception => e
