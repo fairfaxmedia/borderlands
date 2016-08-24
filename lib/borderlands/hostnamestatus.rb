@@ -19,6 +19,7 @@ module Borderlands
       :dns_mismatch => 'DNS:MISMATCH',
       :dns_error    => 'DNS:ERROR',
       :dns_failure  => 'DNS:FAILURE',
+      :dns_staging  => 'DNS:STAGING'
     }
   end
 end
