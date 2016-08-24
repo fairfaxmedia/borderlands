@@ -5,6 +5,7 @@
 * handle wildcard hostnames more gracefully
 * machine-readable output (CSV?)
 * clarify DNS status a bit
+* better checking of wildcard hostnames, if possible?
 
 ## other tech debt types to scan for
 
