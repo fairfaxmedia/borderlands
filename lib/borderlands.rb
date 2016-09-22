@@ -35,7 +35,30 @@ module Borderlands
         options[:property],
       )
       rt = propertymanager.ruletree(property)
-      pp rt
+      rt.walk do |rule|
+        puts "#{"\t" * rule.depth.to_i}#{rule.name}"
+      end
+    end
+
+    desc 'list_origins', 'list all origin hostnames used in a property'
+    method_option :property, type: :string, required: true, desc: 'id of property'
+    method_option :contract, type: :string, required: true, desc: 'id of contract'
+    method_option :group, type: :string, required: true, desc: 'id of group'
+    def list_origins
+      property = propertymanager.property(
+        options[:contract],
+        options[:group],
+        options[:property],
+      )
+      rt = propertymanager.ruletree(property)
+      origins = []
+      rt.walk do |rule|
+        # puts "#{"\t" * rule.depth.to_i}#{rule.name}"
+        rule.behaviors.keep_if { |x| x.name == 'origin' }.each do |behaviour|
+          origins << behaviour.options['hostname']
+        end
+      end
+      puts origins.uniq.sort.join("\n")
     end
 
     method_option :all, type: :boolean, default: false,
