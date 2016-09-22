@@ -21,7 +21,21 @@ module Borderlands
     desc 'list_properties', 'list all accessible properties'
     def list_properties
       puts "# retrieving properties. this may take rather a long time..."
-      puts propertymanager.properties.sort.map { |p| "#{p.id} #{p.name}" }
+      puts propertymanager.properties.sort.map { |p| "#{p.contractid} #{p.groupid} #{p.id} #{p.name}" }
+    end
+
+    desc 'ruletree', 'dump rule tree for a property'
+    method_option :property, type: :string, required: true, desc: 'id of property'
+    method_option :contract, type: :string, required: true, desc: 'id of contract'
+    method_option :group, type: :string, required: true, desc: 'id of group'
+    def ruletree
+      property = propertymanager.property(
+        options[:contract],
+        options[:group],
+        options[:property],
+      )
+      rt = propertymanager.ruletree(property)
+      pp rt
     end
 
     method_option :all, type: :boolean, default: false,

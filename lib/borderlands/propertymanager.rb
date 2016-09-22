@@ -3,6 +3,7 @@ require 'borderlands/contract'
 require 'borderlands/group'
 require 'borderlands/client'
 require 'borderlands/hostname'
+require 'borderlands/rule'
 
 module Borderlands
   class PropertyManager
@@ -33,6 +34,19 @@ module Borderlands
       rescue Exception => e
         raise "unable to retrieve contracts: #{e.message}"
       end
+    end
+
+    # fetch a single property
+    def property(contractid, groupid, propertyid)
+      begin
+        property_hash = @client.get_json_body(
+          "/papi/v0/properties/#{propertyid}",
+          { 'contractId' => contractid, 'groupId' => groupid, },
+        )
+      rescue
+        puts "# unable to retrieve property for (group=#{groupid},contract=#{contractid},property=#{propertyid}): #{e.message}"
+      end
+      Property.new property_hash['properties']['items'].first
     end
 
     # takes a long time to complete!
@@ -79,6 +93,23 @@ module Borderlands
         hostnames = nil
       end
       hostnames
+    end
+
+    # version defaults to current production version here too
+    def ruletree(property,version = nil)
+      raise 'property must be a Borderlands::Property object' unless property.is_a? Property
+      version ||= property.productionversion
+      tree = nil
+      begin
+        rt = @client.get_json_body(
+          "/papi/v0/properties/#{property.id}/versions/#{version}/rules/",
+          { 'contractId' => property.contractid, 'groupId' => property.groupid },
+        )
+        tree = Rule.new rt['rules']
+      rescue Exception => e
+        raise "unable to retrieve rule tree for #{property.name}: #{e.message}"
+      end
+      tree
     end
 
   private
