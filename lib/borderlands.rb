@@ -1,6 +1,7 @@
 require "borderlands/version"
 require "borderlands/config"
 require "borderlands/propertymanager"
+require "borderlands/propertyauditor"
 require 'json'
 require 'pp'
 require 'resolv'
@@ -36,7 +37,10 @@ module Borderlands
       )
       rt = propertymanager.ruletree(property)
       rt.walk do |rule|
-        puts "#{"\t" * rule.depth.to_i}#{rule.name}"
+        indent = "\t" * rule.depth.to_i
+        puts "#{indent}rule: #{rule.name}"
+        rule.criteria.each  { |c| puts "#{indent}- criteria:  #{c.name}" }
+        rule.behaviors.each { |b| puts "#{indent}- behaviour: #{b.name}" }
       end
     end
 
@@ -53,7 +57,6 @@ module Borderlands
       rt = propertymanager.ruletree(property)
       origins = []
       rt.walk do |rule|
-        # puts "#{"\t" * rule.depth.to_i}#{rule.name}"
         rule.behaviors.keep_if { |x| x.name == 'origin' }.each do |behaviour|
           origins << behaviour.options['hostname']
         end
@@ -82,7 +85,7 @@ module Borderlands
                 verdict,
                 groups[property.groupid],
                 property.name,
-                property.productionversion, 
+                property.productionversion,
                 hostname.name,
                 hostname.edgehostname,
                 hostname.status.to_s
@@ -95,6 +98,29 @@ module Borderlands
             property.name,
             property.productionversion || 'none',
             *%w(none none DNS:NONE)
+        end
+      end
+    end
+
+    desc 'audit_origins', 'check conformance of origin rules'
+    def audit_origins
+      properties = propertymanager.properties
+      pra = PropertyRuletreeAuditor.new(properties, { :propertymanager => propertymanager })
+      pra.walk do |property,ruletree|
+        puts "property: #{property.name}"
+        ruletree.walk do |rule|
+          behaviors = rule.behaviors.map { |b| b.name }
+          ok = true
+          if behaviors.include? 'origin'
+            ok = [ 'origin','cpCode' ].all?  { |bb| behaviors.include? bb }
+            puts "* #{rule.name}: origin without corresponding cpCode behaviour" unless ok
+            origin = rule.match_behaviors('origin').first
+            if origin.options['cacheKeyHostname'] == 'ORIGIN_HOSTNAME'
+              puts "* #{rule.name}: cache key hostname == origin hostname"
+            end
+          else
+            ok = false
+          end
         end
       end
     end
