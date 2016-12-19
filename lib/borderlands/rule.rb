@@ -43,6 +43,10 @@ module Borderlands
       ppout.join("\n")
     end
 
+    def match_behaviors(bmatch)
+      behaviors.keep_if { |b| b.name == bmatch }
+    end
+
     def walk(&block)
       raise "expected block" unless block_given?
       yield self
@@ -50,6 +54,7 @@ module Borderlands
     end
 
     attr_reader :options
+    attr_reader :criteria
     attr_reader :behaviors
     attr_reader :children
     attr_reader :depth
