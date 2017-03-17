@@ -106,11 +106,6 @@ module Borderlands
     def audit_origins
       properties = propertymanager.properties
       pra = PropertyRuletreeAuditor.new(properties, { :propertymanager => propertymanager })
-      pra.filter do |property|
-        property.id == 'prp_181359'             &&
-          property.contractid == 'ctr_3-152063' &&
-          property.groupid == 'grp_57162'
-      end
       pra.walk do |property,ruletree|
         puts "property: #{property.name}"
         ruletree.walk do |rule|
