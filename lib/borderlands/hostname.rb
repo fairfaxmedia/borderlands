@@ -8,7 +8,6 @@ module Borderlands
       @name         = data['cnameFrom']
       @edgehostname = data['cnameTo']
       @cnametype    = data['cnameType']
-      update_status
     end
     def update_status(refresh = false)
       @cnamechecker ||= CNAMEChecker.new

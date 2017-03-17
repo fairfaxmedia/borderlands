@@ -73,7 +73,7 @@ module Borderlands
 
     # version defaults to the current production version, which is pretty
     # much always going to be the most meaningful thing to look at
-    def hostnames(property, version = nil)
+    def hostnames(property, skip_update_dns_status = false, version = nil)
       raise 'property must be a Borderlands::Property object' unless property.is_a? Property
       version ||= property.productionversion
       begin
@@ -86,7 +86,9 @@ module Borderlands
       end
       if hostnames_hash && hostnames_hash['hostnames'] && hostnames_hash['hostnames']['items']
         hostnames = hostnames_hash['hostnames']['items'].map do |ehn|
-          Hostname.new ehn
+          h = Hostname.new ehn
+          h.update_status unless skip_update_dns_status
+          h
         end
       else
         # no hostnames returned
