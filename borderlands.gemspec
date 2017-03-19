@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{Conduct assorted Akamai CDN audit tasks}
   spec.description   = %q{Conduct assorted audit tasks on an Akamai CDN account, using the Property Manager API}
   spec.homepage      = "https://github.com/fairfaxmedia/borderlands"
-  spec.license       = "MIT"
+  spec.license       = "Apache-2.0"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = "exe"
